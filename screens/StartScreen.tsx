@@ -8,8 +8,8 @@ type StartScreenProps = {
 };
 
 const StartScreen = ({navigation}: StartScreenProps) => {
-  const handleStartGame = () => {
-    navigation.navigate('Game'); // Przejdź do widoku gry
+  const handleLogin = () => {
+    navigation.navigate('Login');
   };
 
   const handleExitApp = () => {
@@ -20,11 +20,11 @@ const StartScreen = ({navigation}: StartScreenProps) => {
     <View style={styles.firstView}>
       <Text style={styles.welcomeText}>Welcome to wordle app!</Text>
       <View style={styles.buttonsContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleStartGame}>
-          <Text style={styles.buttonText}>Rozpocznij grę</Text>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={handleExitApp}>
-          <Text style={styles.buttonText}>Wyjście</Text>
+          <Text style={styles.buttonText}>Exit</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -39,9 +39,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginHorizontal: 20,
-    fontFamily: 'Tahoma', // Ustawienie czcionki na Tahoma
-    textAlign: 'center', // Wyrównanie tekstu na środku w poziomie
-    textAlignVertical: 'center', // Wyrównanie tekstu na środku w pionie
+    fontFamily: 'Tahoma',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   firstView: {
     flex: 1,
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   buttonsContainer: {flexDirection: 'column', margin: 100},
   button: {
     marginVertical: 10,
-    width: 280,
+    width: 350,
     paddingVertical: 10,
     backgroundColor: '#6ca965',
     borderRadius: 5,
@@ -63,5 +63,3 @@ const styles = StyleSheet.create({
     color: 'white',
   },
 });
-
-//https://www.color-hex.com/color-palette/1012607

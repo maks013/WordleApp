@@ -5,8 +5,9 @@ import {
   SafeAreaView,
   Text,
   TouchableOpacity,
-  Button,
 } from 'react-native';
+import axios from 'axios';
+import {useRoute} from '@react-navigation/native';
 
 const Block = ({
   index,
@@ -102,18 +103,31 @@ const Keyboard = ({onKeyPress}: {onKeyPress: (letter: string) => void}) => {
   );
 };
 
-const words = [
-  'BREAD',
-  'PEACH',
-  'HORSE',
-  'CLOUD',
-  'GREEN',
-  'TABLE',
-  'SMILE',
-  'NORTH',
-  'BRAIN',
-  'MOUNT',
-];
+const apiUrl =
+  'https://raw.githubusercontent.com/tabatkins/wordle-list/main/words';
+const words: string[] = [];
+
+async function fetchWords() {
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.text();
+    const wordsArray = data.split('\n');
+    wordsArray.forEach(word => words.push(word.toUpperCase()));
+  } catch (error) {
+    console.error('Error fetching words:', error);
+  }
+}
+
+fetchWords();
+
+const winGame = async nickname => {
+  try {
+    await axios.post(`http://192.168.0.106:8080/game/win/${nickname}`);
+    console.log('You win!');
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 interface IGuess {
   [key: number]: string;
@@ -133,6 +147,8 @@ const GameScreen = () => {
   const [guessIndex, setGuessIndex] = React.useState(0);
   const [guesses, setGuesses] = useState<IGuess>(defaultGuess);
   const [gameComplete, setGameComplete] = React.useState(false);
+  const route = useRoute();
+  const {nickname} = route.params;
 
   const handleKeyPress = (letter: string) => {
     const guess: string = guesses[guessIndex];
@@ -151,6 +167,7 @@ const GameScreen = () => {
       if (guess === activeWord) {
         setGuessIndex(guessIndex + 1);
         setGameComplete(true);
+        winGame(nickname);
         alert('You win!');
         return;
       }
@@ -169,7 +186,6 @@ const GameScreen = () => {
       return;
     }
 
-    // don't add if guess is full
     if (guess.length >= 5) {
       return;
     }
@@ -223,15 +239,25 @@ const GameScreen = () => {
         {gameComplete ? (
           <View style={styles.gameCompleteWrapper}>
             <Text>
-              <Text style={styles.bold}>Correct Word:</Text> {activeWord}
+              <Text style={styles.bold}>Correct Word: {activeWord}</Text>
             </Text>
             <View>
-              <Button
-                title="Reset"
-                onPress={() => {
+              <TouchableOpacity
+                style={styles.button}
+                onPress={async () => {
                   setGameComplete(false);
-                }}
-              />
+                  try {
+                    await axios.post(
+                      `http://192.168.0.106:8080/game/play/${nickname}`,
+                    );
+                    console.log('POST request sent successfully');
+                  } catch (error) {
+                    console.error(error);
+                    alert('An error occurred while playing the game');
+                  }
+                }}>
+                <Text style={styles.buttonText}>Play again</Text>
+              </TouchableOpacity>
             </View>
           </View>
         ) : null}
@@ -279,14 +305,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#787c7e',
     borderColor: '#787c7e',
   },
-
   container: {
     justifyContent: 'space-between',
     backgroundColor: '#333333',
     flex: 1,
   },
-
-  // keyboard
   keyboard: {flexDirection: 'column', backgroundColor: '#333333'},
   keyboardRow: {
     flexDirection: 'row',
@@ -304,12 +327,23 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#FFFFFF',
   },
-
-  // Game complete
   gameCompleteWrapper: {
     alignItems: 'center',
   },
   bold: {
     fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  button: {
+    marginVertical: 10,
+    width: 350,
+    paddingVertical: 10,
+    backgroundColor: '#6ca965',
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 16,
+    color: 'white',
   },
 });
